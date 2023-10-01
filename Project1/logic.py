@@ -1,3 +1,6 @@
+from Project1.exeptions import ValidateKeyIntError, ValidateKeyLengthError, ValidateTextError
+
+
 class CaesarCipher:
     def __init__(self, alphabet, key):
         self.alphabet = alphabet
@@ -5,29 +8,30 @@ class CaesarCipher:
 
     def check_key(self, key):
         if not isinstance(key, int):
-            raise ValueError("Ключ повинен бути цілим числом")
+            raise ValidateKeyIntError(key)
         if key < 0 or key >= len(self.alphabet):
-            raise ValueError("Ключ повинен бути в межах довжини алфавіту")
+            raise ValidateKeyLengthError()
 
-    def check_text(self, text):
+    @staticmethod
+    def check_text(text):
         for char in text:
             if char not in text:
-                raise ValueError("Ключ повинен бути цілим числом")
+                raise ValidateTextError(char)
+
+    def get_index(self, char):
+        return (self.alphabet.index(char) + self.key) % len(self.alphabet)
+
+    def get_symbol(self, char, is_upper):
+        index = self.get_index(char)
+        return self.alphabet[index] if is_upper else self.alphabet[index].lower()
 
     def encrypt(self, text):
-        self.check_key(self.key)
+        self.check_key(self.key)  # self.check_text(text)
         encrypted_text = ""
         for char in text:
             is_upper = char.isupper()
             char = char.upper()
-            if char in self.alphabet:
-                index = (self.alphabet.index(char) + self.key) % len(self.alphabet)
-                if not is_upper:
-                    encrypted_text += self.alphabet[index].lower()
-                else:
-                    encrypted_text += self.alphabet[index]
-            else:
-                encrypted_text += char
+            encrypted_text += self.get_symbol(char, is_upper) if char in self.alphabet else char
         return encrypted_text
 
     def decrypt(self, text):
@@ -38,13 +42,10 @@ class CaesarCipher:
             char = char.upper()
             if char in self.alphabet:
                 index = (self.alphabet.index(char) - self.key) % len(self.alphabet)
-                if not is_upper:
-                    decrypted_text += self.alphabet[index].lower()
-                else:
-                    decrypted_text += self.alphabet[index]
+                decrypted_text += self.alphabet[index] if is_upper else self.alphabet[index].lower()
             else:
                 decrypted_text += char
         return decrypted_text
 
     def __str__(self):
-        return f'alphabet: {self.alphabet}, key: {self.key}'
+        return f'alphabet: {self.alphabet}'
