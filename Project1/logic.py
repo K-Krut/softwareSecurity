@@ -1,19 +1,20 @@
-from Project1.exeptions import ValidateKeyIntError, ValidateKeyLengthError, ValidateTextError
+import string
+
+from Project1.exeptions import ValidateKeyIntError, ValidateKeyLengthError
 
 
 class CaesarCipher:
-    def __init__(self, english_alphabet, ukrainian_alphabet, key):
-        self.english_alphabet = english_alphabet
-        self.ukrainian_alphabet = ukrainian_alphabet
+    def __init__(self, key):
+        self.english_alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        self.ukrainian_alphabet = "АБВГҐДЕЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ"
+        self.special_alphabet = string.digits + string.punctuation
         self.key = key
 
     def get_alphabet(self, char):
-        if char.upper() in self.english_alphabet:
-            return self.english_alphabet
-        elif char.upper() in self.ukrainian_alphabet:
-            return self.ukrainian_alphabet
-        else:
-            return None
+        for alphabet in [self.english_alphabet, self.ukrainian_alphabet, self.special_alphabet]:
+            if char.upper() in alphabet:
+                return alphabet
+        return None
 
     def check_key(self, alphabet):
         if not isinstance(self.key, int):
@@ -48,4 +49,5 @@ class CaesarCipher:
         return self.process_text(text, operation='decrypt')
 
     def __str__(self):
-        return f'English Alphabet: {self.english_alphabet}\nUkrainian Alphabet: {self.ukrainian_alphabet}'
+        return f'English Alphabet: {self.english_alphabet}\nUkrainian Alphabet: {self.ukrainian_alphabet}\n' \
+               f'Special Alphabet: {self.special_alphabet}'
