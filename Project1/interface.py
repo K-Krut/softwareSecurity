@@ -1,32 +1,31 @@
 class CaesarCipherCLI:
     def __init__(self, cipher):
         self.cipher = cipher
+        self.dict_func = {
+            '1': self.open_file,
+            '2': self.save_file,
+            '3': self.encrypt,
+            '4': self.decrypt,
+            '5': self.about,
+            '6': self.exit_program,
+        }
 
     def run(self):
+
         while True:
-            print("1. Відкрити файл")
-            print("2. Зберегти файл")
-            print("3. Шифрувати текст")
-            print("4. Розшифрувати текст")
-            print("5. Про розробника")
-            print("6. Вийти")
+            print("1. Відкрити файл\n"
+                  "2. Зберегти файл\n"
+                  "3. Шифрувати текст\n"
+                  "4. Розшифрувати текст\n"
+                  "5. Про розробника\n"
+                  "6. Вийти")
 
             choice = input("Введіть номер опції: ")
 
-            if choice == '1':
-                self.open_file()
-            elif choice == '2':
-                self.save_file()
-            elif choice == '3':
-                self.encrypt()
-            elif choice == '4':
-                self.decrypt()
-            elif choice == '5':
-                self.about()
-            elif choice == '6':
-                break
-            else:
-                print("Невірний вибір, спробуйте знову.")
+            try:
+                self.dict_func[choice]()
+            except Exception as e:
+                print(f"Введено невірну опцію: {e}")
 
     def open_file(self):
         file_path = input("Введіть шлях до файлу: ")
@@ -60,4 +59,8 @@ class CaesarCipherCLI:
         print(self.cipher.decrypt(text))
 
     def about(self):
-        print("Розробник: Ім'я Розробника\nКонтакт: example@example.com")
+        print("Розробник: Kate Krut\nКонтакт: https://t.me/k_krut")
+
+    def exit_program(self):
+        print("Exiting")
+        exit()
