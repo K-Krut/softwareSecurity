@@ -10,6 +10,7 @@ class TritemiusCipher:
         self.special_a = string.digits + string.punctuation
         self.validate_key(key)
         self.key = key
+        self.key_alphabet = None
 
     def get_alphabet(self, char):
         for alphabet in [self.en_a, self.uk_a, self.special_a]:
@@ -24,6 +25,10 @@ class TritemiusCipher:
 
     def check_str_key(self, key):
         return all(char.upper() in self.uk_a or char in self.en_a or char in self.special_a for char in key)
+
+    def identify_key_alphabet(self):
+        return self.uk_a if self.key[0].upper() in self.uk_a else \
+            self.en_a if self.key[0].upper() in self.en_a else self.special_a
 
     def validate_key(self, key):
         if not (isinstance(key, tuple) or isinstance(key, str)):
@@ -41,31 +46,34 @@ class TritemiusCipher:
                 raise ValidateKeyError(key, f'Довжина ключа ({len(key)}) більшa ніж може бути')
             if not self.check_str_key(key):
                 ValidateKeyError(key, f'Всі символи ключа мабть належати до одного алфавіту')
+            self.key_alphabet = self.identify_key_alphabet()
 
     def get_k(self, p):
-        if len(self.key) == 2:  # лінійне рівняння
-            return self.key[0] * p + self.key[1]
-        if len(self.key) == 3:  # нелінійне рівняння
-            return self.key[0] * p ** 2 + self.key[1] * p + self.key[2]
-        return self.alphabet.index(self.key[p % len(self.key)])
+        if isinstance(self.key, tuple):
+            if len(self.key) == 2:
+                return self.key[0] * p + self.key[1]
+            if len(self.key) == 3:
+                return self.key[0] * p ** 2 + self.key[1] * p + self.key[2]
+        return self.key_alphabet.index(self.key[p % len(self.key)])
 
-    def get_index(self, char, alphabet):
-        return (alphabet.index(char) + self.key) % len(alphabet)
+    def get_index(self, char, alphabet, p):
+        return (alphabet.index(char) - self.get_k(p)) % len(alphabet)
 
     def get_index_decrypt(self, char, alphabet):
         return (alphabet.index(char) - self.key) % len(alphabet)
 
-    def get_symbol(self, char, is_upper, alphabet, operation):
-        index = self.get_index(char, alphabet) if operation == 'encrypt' else self.get_index_decrypt(char, alphabet)
+    def get_symbol(self, char, is_upper, alphabet, p, operation):
+        index = self.get_index(char, alphabet, p) if operation == 'encrypt' else self.get_index_decrypt(char, alphabet)
         return alphabet[index] if is_upper else alphabet[index].lower()
 
     def process_text(self, text, operation='encrypt'):
         result = ""
         for char in text:
+            p = text.index(char)
             is_upper = char.isupper()
             char = char.upper()
             alphabet = self.get_alphabet(char)
-            result += self.get_symbol(char, is_upper, alphabet, operation) if alphabet else char
+            result += self.get_symbol(char, is_upper, alphabet, p, operation) if alphabet else char
         return result
 
     def encrypt(self, text):
@@ -77,3 +85,4 @@ class TritemiusCipher:
     def __str__(self):
         return f'English Alphabet: {self.en_a}\nUkrainian Alphabet: {self.uk_a}\n' \
                f'Special Alphabet: {self.special_a}'
+

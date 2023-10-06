@@ -1,4 +1,4 @@
-class CaesarCipherCLI:
+class TritemiusCipherCLI:
     def __init__(self, cipher):
         self.cipher = cipher
         self.text = ''
