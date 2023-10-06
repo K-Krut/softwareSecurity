@@ -57,13 +57,13 @@ class TritemiusCipher:
         return self.key_alphabet.index(self.key[p % len(self.key)])
 
     def get_index(self, char, alphabet, p):
-        return (alphabet.index(char) - self.get_k(p)) % len(alphabet)
+        return (alphabet.index(char) + self.get_k(p)) % len(alphabet)
 
-    def get_index_decrypt(self, char, alphabet):
-        return (alphabet.index(char) - self.key) % len(alphabet)
+    def get_index_decrypt(self, char, alphabet, p):
+        return (alphabet.index(char) + len(alphabet) - (self.get_k(p) % len(alphabet))) % len(alphabet)
 
     def get_symbol(self, char, is_upper, alphabet, p, operation):
-        index = self.get_index(char, alphabet, p) if operation == 'encrypt' else self.get_index_decrypt(char, alphabet)
+        index = self.get_index(char, alphabet, p) if operation == 'encrypt' else self.get_index_decrypt(char, alphabet, p)
         return alphabet[index] if is_upper else alphabet[index].lower()
 
     def process_text(self, text, operation='encrypt'):
