@@ -1,6 +1,5 @@
 import string
 import numpy as np
-
 from Project2.logic import TritemiusCipher
 
 
@@ -25,17 +24,19 @@ class TritemiusAttack:
         for p, (char_orig, char_encr) in enumerate(zip(orig_text, encr_text)):
             alphabet = self.get_alphabet(char_orig)
             if alphabet:
-                res.append((p, self.get_char_diff(char_orig.upper(), char_encr.upper(), alphabet), alphabet))
-        return res
+                char_diff = self.get_char_diff(char_orig.upper(), char_encr.upper(), alphabet)
+                res.append((p, char_diff, alphabet))
+        return res[:2]
+
 
     @staticmethod
     def solve_2d(p1, p2, k1, k2, alphabet):
         """
         Вирішуємо матрицю рівнянь типу k = Ap + B;
-        :param p1:
-        :param p2:
-        :param k1:
-        :param k2:
+        :param p1: номер 1 символу в тексті
+        :param p2: номер 2 символу в тексті
+        :param k1: різниця між оригінальним символом і зашифорованим для 1 символу тексту
+        :param k2: різниця між оригінальним символом і зашифорованим для 2 символу тексту
         :param alphabet: алфавіт для символу
         :return: (key_value_1, key_value_2)
         """
@@ -44,12 +45,11 @@ class TritemiusAttack:
         res = np.linalg.solve(A, B) % len(alphabet)
         return int(res[0]), int(res[1])
 
-    def recover_key(self, orig_text, encr_text):
+    def get_key(self, orig_text, encr_text):
         if len(orig_text) != len(encr_text):
             raise ValueError("Тексти не є парами")
 
         diff = self.get_differences(orig_text, encr_text)
-        print(diff)
 
         p1, k1, alphabet1 = diff[0]
         p2, k2, alphabet2 = diff[1]
@@ -59,15 +59,7 @@ class TritemiusAttack:
 
 
 cipher = TritemiusCipher((5, 7))
-
-# Оригінальний текст
-original_text = "TESTДРЛНВ"
-
-# Зашифруємо текст
-encrypted_text = cipher.encrypt(original_text)
-print(f"Encrypted Text: {encrypted_text}")
-
-attack = TritemiusAttack()
-# Спробуємо відновити ключ
-recovered_k = attack.recover_key(original_text, encrypted_text)
-print(f"Recovered k value: {recovered_k}")
+orig_text = "TАESTДрлНВ"
+encr_text = cipher.encrypt(orig_text)
+print(f"Оригінальний текст: {orig_text}\nЗашифрований текст: {encr_text}\n")
+print(f"Ключ: {TritemiusAttack().get_key(orig_text, encr_text)}")
