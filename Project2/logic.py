@@ -10,7 +10,9 @@ class TritemiusCipher:
         self.special_a = string.digits + string.punctuation
         self.validate_key(key)
         self.key = key
-        self.key_alphabet = self.identify_key_alphabet(self.key)
+        self.key_alphabet = None
+        if isinstance(key, str):
+            self.key_alphabet = self.identify_key_alphabet(key)
 
     def get_alphabet(self, char):
         for alphabet in [self.en_a, self.uk_a, self.special_a]:
