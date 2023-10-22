@@ -1,4 +1,4 @@
-class TritemiusCipherCLI:
+class BookCipherCLI:
     def __init__(self, cipher):
         self.cipher = cipher
         self.text = ''
@@ -23,12 +23,11 @@ class TritemiusCipherCLI:
                 print(f"Введено невірну опцію: {e}")
 
     def encrypt(self):
-        print(self.cipher)
         print(f'Зашифрований текст: {self.cipher.encrypt(input("Введіть текст для шифрування: "))}')
 
     def decrypt(self):
-        print(self.cipher)
-        print(f'Розшифрований текст: {self.cipher.decrypt(input("Введіть текст: "))}')
+        print(f'Розшифрований текст: '
+              f'{self.cipher.decrypt(input("Введіть текст: "), input("Введіть символ алфавіту тексту: "))}')
 
     @staticmethod
     def about():
