@@ -6,35 +6,28 @@ class EncryptionType(Enum):
     MerkleHellman = 1
 
 
-class DataForEncryption:
-    en_alphabets = ("abcdefghijklmnopqrstuvwxyz", "ABCDEFGHIJKLMNOPQRSTUVWXYZ")
-    ukr_alphabets = ("абвгґдеєжзиіїйклмнопрстуфхцчшщьюя", "АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯ")
-    rus_alphabets = ("абвгдеёжзийклмнопрстуфхцчшщъыьэюя", "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ")
+class MerkleHellmanCipher:
+    def __init__(self, sequence=None, keys=None):
+        self.sequence = self.validate_sequence(sequence)
+        self.keys = self.validate_keys(keys, sequence)
 
-    all_languages = en_alphabets + rus_alphabets
-
-    initialization_vector = bytes(en_alphabets[0][:8], "ascii")
-
-    def __init__(self, the_value: str):
-        self.the_string_value = the_value
-
-    def process_data(self, arg_encryption_type: EncryptionType):
-        chose_process = ""
-        while True:
-            print("Choose one options among all below")
-            print("1. Encrypt data")
-            print("2. Decrypt data")
-            chose_process = input().strip()
-            if chose_process in ("1", "2"):
-                break
-            else:
-                print("Wrong input! Type number 1 or 2 and nothing else")
-
-        result_data = []
-
-        if arg_encryption_type == EncryptionType.MerkleHellman:
-            result_data = self.merkle_hellman_encryption(chose_process)
-        return "Result:\n" + "".join(result_data) + "\n"
+    # def process_data(self, arg_encryption_type: EncryptionType):
+    #     chose_process = ""
+    #     while True:
+    #         print("Choose one options among all below")
+    #         print("1. Encrypt data")
+    #         print("2. Decrypt data")
+    #         chose_process = input().strip()
+    #         if chose_process in ("1", "2"):
+    #             break
+    #         else:
+    #             print("Wrong input! Type number 1 or 2 and nothing else")
+    #
+    #     result_data = []
+    #
+    #     if arg_encryption_type == EncryptionType.MerkleHellman:
+    #         result_data = self.merkle_hellman_encryption(chose_process)
+    #     return "Result:\n" + "".join(result_data) + "\n"
 
     @staticmethod
     def check_sequence_increasing(sequence):
@@ -46,8 +39,7 @@ class DataForEncryption:
 
     def get_sequence(self):
         while True:
-            print("type super-increasing sequence of positive integers")
-            input_sequence = input().strip().split(" ")
+            input_sequence = input("type super-increasing sequence of positive integers").strip().split(" ")
 
             if self.check_sequence_digits(input_sequence):
                 sequence = list(map(int, input_sequence))
@@ -55,6 +47,15 @@ class DataForEncryption:
                     return sequence
                 print("Sequence of positive integers must be super-increasing!")
             print("sequence must be super-increasing of positive integers!")
+
+    def validate_sequence(self, input_sequence):
+        input_sequence = input_sequence.strip().split(" ")
+        if not self.check_sequence_digits(input_sequence):
+            raise ValueError('Послідовність має складатись лише з цифр')
+        sequence = list(map(int, input_sequence))
+        if not self.check_sequence_increasing(sequence):
+            raise ValueError('Послідовність має бути супер-зростаючою')
+        return sequence
 
     def get_keys(self, sequence):
         while True:
@@ -70,6 +71,17 @@ class DataForEncryption:
                 return q_value, r_value
             print("Input must be two integers!")
 
+    def validate_keys(self, q_r_values, sequence):
+        q_r_values = q_r_values.strip().split(" ")
+        if not self.check_sequence_digits(q_r_values):
+            raise ValueError('Input must be two integers!')
+        q, r = int(q_r_values[0]), int(q_r_values[1])
+        if not q <= sum(sequence):
+            raise ValueError("The 'q' value must be greater than the sum of super increasing sequence !")
+        if not gcd(q, r) != 1:
+            raise ValueError("The 'r' number must be co-prime to 'q'! (GCD(q, r) = 1)")
+        return q, r
+
     @staticmethod
     def get_bit(char):
         return bin(ord(char))[2:]
@@ -84,8 +96,8 @@ class DataForEncryption:
     def get_encrypted_char(bit, key):
         return sum(int(bit[bit_index]) * key[bit_index] for bit_index in range(len(bit)))
 
-    def encrypt(self, sequence_len, key):
-        bit_result = [self.get_bit_result(sequence_len, char) for char in self.the_string_value]
+    def encrypt(self, text, sequence_len, key):
+        bit_result = [self.get_bit_result(sequence_len, char) for char in text]
         return " ".join([str(self.get_encrypted_char(bit, key)) for bit in bit_result])
 
     @staticmethod
@@ -108,20 +120,16 @@ class DataForEncryption:
             r_inverse += 1
         return r_inverse
 
-    def decrypt(self, r_value, q_value, sequence, seq_len):
-        enc_values = self.the_string_value.split(" ")
-        r_inverse = self.get_r_inverse(r_value, q_value)
-        return "".join([chr(self.get_decrypted_char(num, sequence, seq_len, r_inverse, q_value)) for num in enc_values])
+    def decrypt(self, text, r, q, sequence):
+        enc_values = text.split(" ")
+        r_inverse = self.get_r_inverse(r, q)
+        return "".join([chr(self.get_decrypted_char(num, sequence, len(sequence), r_inverse, q)) for num in enc_values])
 
-    def merkle_hellman_encryption(self, arg_chose_process):
+    def merkle_hellman_encryption(self, text, choose):
         sequence = self.get_sequence()
         q, r = self.get_keys(sequence)
-        private_key = [sequence, q, r]
-        print(private_key)
         key = [(private_value * r) % q for private_value in sequence]
-        seq_len = len(sequence)
-
-        return self.encrypt(seq_len, key) if arg_chose_process == "1" else self.decrypt(r, q, sequence, seq_len)
+        return self.encrypt(text, len(sequence), key) if choose == "1" else self.decrypt(text, r, q, sequence)
 
 
 # if __name__ == '__main__':
