@@ -3,8 +3,8 @@ from math import gcd
 
 class MerkleHellmanCipher:
     def __init__(self, sequence=None, keys=None):
-        self.sequence = self.validate_sequence(sequence.strip().split(" "))
-        self.q, self.r = self.validate_keys(keys.strip().split(" "), self.sequence)
+        self.sequence = self.validate_sequence(sequence)
+        self.q, self.r = self.validate_keys(keys, self.sequence)
         self.key = self.get_key(self.r, self.q, self.sequence)
 
     @staticmethod
@@ -24,7 +24,7 @@ class MerkleHellmanCipher:
             raise ValueError('Послідовність має складатись лише з цифр')
         sequence = list(map(int, input_sequence))
         if not self.check_sequence_increasing(sequence):
-            raise ValueError('Послідовність має бути супер-зростаючою')
+            raise ValueError('Послідовність має бути суперзростаючою')
         return sequence
 
     def validate_keys(self, q_r_values, sequence):
@@ -80,8 +80,3 @@ class MerkleHellmanCipher:
         r_inverse = self.get_r_inverse(self.r, self.q)
         return "".join([chr(self.get_decrypted_char(num, self.sequence, len(self.sequence), r_inverse, self.q))
                         for num in enc_values])
-
-# if __name__ == '__main__':
-#     print(DataForEncryption('aHelloWorld!').
-#           merkle_hellman_encryption("1"))
-

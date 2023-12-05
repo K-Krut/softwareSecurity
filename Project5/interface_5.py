@@ -10,7 +10,6 @@ class MerkleHellmanCipherCLI:
         }
 
     def run(self):
-
         while True:
             print("1. Шифрувати текст\n"
                   "2. Розшифрувати текст\n"
@@ -22,11 +21,11 @@ class MerkleHellmanCipherCLI:
                 print(f"Введено невірну опцію: {e}")
 
     def encrypt(self):
-        print(f'Зашифрований текст: {self.cipher.encrypt(input("Введіть текст для шифрування: "))}')
+        print(f'Зашифрований текст: {self.cipher.encrypt(input("Введіть текст для шифрування: "))}\n')
 
     def decrypt(self):
         print(f'Розшифрований текст: '
-              f'{self.cipher.decrypt(input("Введіть текст: "))}')
+              f'{self.cipher.decrypt(input("Введіть текст: "))}\n')
 
     @staticmethod
     def about():
