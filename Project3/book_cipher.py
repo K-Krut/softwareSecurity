@@ -82,7 +82,7 @@ class BookCipher:
 
     def get_symbol_decrypt(self, key, poem, poem_keys, alphabet):
         return poem[key] if self.check_key_is_in_poem(key, poem_keys) else alphabet[int(key.split('/')[1])] if \
-            key.split('/')[0] == '0' else key
+            key.split('/')[0] == '0' else '(?)' if self.check_key_format(key, alphabet) else key
 
     def encrypt(self, text):
         text = text.lower().strip()
