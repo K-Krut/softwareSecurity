@@ -1,9 +1,4 @@
-from enum import Enum
 from math import gcd
-
-
-class EncryptionType(Enum):
-    MerkleHellman = 1
 
 
 class MerkleHellmanCipher:
@@ -11,24 +6,6 @@ class MerkleHellmanCipher:
         self.sequence = self.validate_sequence(sequence.strip().split(" "))
         self.q, self.r = self.validate_keys(keys.strip().split(" "), self.sequence)
         self.key = self.get_key(self.r, self.q, self.sequence)
-
-    # def process_data(self, arg_encryption_type: EncryptionType):
-    #     chose_process = ""
-    #     while True:
-    #         print("Choose one options among all below")
-    #         print("1. Encrypt data")
-    #         print("2. Decrypt data")
-    #         chose_process = input().strip()
-    #         if chose_process in ("1", "2"):
-    #             break
-    #         else:
-    #             print("Wrong input! Type number 1 or 2 and nothing else")
-    #
-    #     result_data = []
-    #
-    #     if arg_encryption_type == EncryptionType.MerkleHellman:
-    #         result_data = self.merkle_hellman_encryption(chose_process)
-    #     return "Result:\n" + "".join(result_data) + "\n"
 
     @staticmethod
     def get_key(r, q, sequence):
@@ -42,17 +19,6 @@ class MerkleHellmanCipher:
     def check_sequence_digits(input_):
         return all(map(str.isdigit, input_))
 
-    def get_sequence(self):
-        while True:
-            input_sequence = input("type super-increasing sequence of positive integers").strip().split(" ")
-
-            if self.check_sequence_digits(input_sequence):
-                sequence = list(map(int, input_sequence))
-                if self.check_sequence_increasing(sequence):
-                    return sequence
-                print("Sequence of positive integers must be super-increasing!")
-            print("sequence must be super-increasing of positive integers!")
-
     def validate_sequence(self, input_sequence):
         if not self.check_sequence_digits(input_sequence):
             raise ValueError('Послідовність має складатись лише з цифр')
@@ -60,20 +26,6 @@ class MerkleHellmanCipher:
         if not self.check_sequence_increasing(sequence):
             raise ValueError('Послідовність має бути супер-зростаючою')
         return sequence
-
-    def get_keys(self, sequence):
-        while True:
-            print("type 'q' and 'r' such that 'q' > sum of super increasing sequence & 'r' co-prime to 'q'")
-            q_r_values = input().strip().split(" ")
-
-            if self.check_sequence_digits(q_r_values):
-                q_value, r_value = int(q_r_values[0]), int(q_r_values[1])
-                if q_value <= sum(sequence):
-                    print("The 'q' value must be greater than the sum of super increasing sequence !")
-                elif gcd(q_value, r_value) != 1:
-                    print("The 'r' number must be co-prime to 'q'! (GCD(q, r) = 1)")
-                return q_value, r_value
-            print("Input must be two integers!")
 
     def validate_keys(self, q_r_values, sequence):
         if not self.check_sequence_digits(q_r_values):
@@ -99,9 +51,9 @@ class MerkleHellmanCipher:
     def get_encrypted_char(bit, key):
         return sum(int(bit[bit_index]) * key[bit_index] for bit_index in range(len(bit)))
 
-    def encrypt(self, text, sequence_len, key):
-        bit_result = [self.get_bit_result(sequence_len, char) for char in text]
-        return " ".join([str(self.get_encrypted_char(bit, key)) for bit in bit_result])
+    def encrypt(self, text):
+        bit_result = [self.get_bit_result(len(self.sequence), char) for char in text]
+        return " ".join([str(self.get_encrypted_char(bit, self.key)) for bit in bit_result])
 
     @staticmethod
     def get_number_inverse(num, r_inverse, q_value):
@@ -123,17 +75,11 @@ class MerkleHellmanCipher:
             r_inverse += 1
         return r_inverse
 
-    def decrypt(self, text, r, q, sequence):
+    def decrypt(self, text):
         enc_values = text.split(" ")
-        r_inverse = self.get_r_inverse(r, q)
-        return "".join([chr(self.get_decrypted_char(num, sequence, len(sequence), r_inverse, q)) for num in enc_values])
-
-    def merkle_hellman_encryption(self, text, choose):
-        sequence = self.get_sequence()
-        q, r = self.get_keys(sequence)
-        key = [(private_value * r) % q for private_value in sequence]
-        return self.encrypt(text, len(sequence), key) if choose == "1" else self.decrypt(text, r, q, sequence)
-
+        r_inverse = self.get_r_inverse(self.r, self.q)
+        return "".join([chr(self.get_decrypted_char(num, self.sequence, len(self.sequence), r_inverse, self.q))
+                        for num in enc_values])
 
 # if __name__ == '__main__':
 #     print(DataForEncryption('aHelloWorld!').
