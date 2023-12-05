@@ -30,7 +30,7 @@ class MerkleHellmanCipherCLI:
 
     @staticmethod
     def about():
-        print("Розробник: Kate Krut\nКонтакт: https://t.me/k_krut")
+        print("Розробник: Kate Krut\nКонтакт: https://t.me/k_krut\n")
 
     @staticmethod
     def exit_program():

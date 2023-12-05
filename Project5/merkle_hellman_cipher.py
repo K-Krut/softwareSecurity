@@ -8,8 +8,9 @@ class EncryptionType(Enum):
 
 class MerkleHellmanCipher:
     def __init__(self, sequence=None, keys=None):
-        self.sequence = self.validate_sequence(sequence)
-        self.keys = self.validate_keys(keys, sequence)
+        self.sequence = self.validate_sequence(sequence.strip().split(" "))
+        self.q, self.r = self.validate_keys(keys.strip().split(" "), self.sequence)
+        self.key = self.get_key(self.r, self.q, self.sequence)
 
     # def process_data(self, arg_encryption_type: EncryptionType):
     #     chose_process = ""
@@ -28,6 +29,10 @@ class MerkleHellmanCipher:
     #     if arg_encryption_type == EncryptionType.MerkleHellman:
     #         result_data = self.merkle_hellman_encryption(chose_process)
     #     return "Result:\n" + "".join(result_data) + "\n"
+
+    @staticmethod
+    def get_key(r, q, sequence):
+        return [(private_value * r) % q for private_value in sequence]
 
     @staticmethod
     def check_sequence_increasing(sequence):
@@ -49,7 +54,6 @@ class MerkleHellmanCipher:
             print("sequence must be super-increasing of positive integers!")
 
     def validate_sequence(self, input_sequence):
-        input_sequence = input_sequence.strip().split(" ")
         if not self.check_sequence_digits(input_sequence):
             raise ValueError('Послідовність має складатись лише з цифр')
         sequence = list(map(int, input_sequence))
@@ -72,14 +76,13 @@ class MerkleHellmanCipher:
             print("Input must be two integers!")
 
     def validate_keys(self, q_r_values, sequence):
-        q_r_values = q_r_values.strip().split(" ")
         if not self.check_sequence_digits(q_r_values):
             raise ValueError('Input must be two integers!')
         q, r = int(q_r_values[0]), int(q_r_values[1])
-        if not q <= sum(sequence):
-            raise ValueError("The 'q' value must be greater than the sum of super increasing sequence !")
-        if not gcd(q, r) != 1:
-            raise ValueError("The 'r' number must be co-prime to 'q'! (GCD(q, r) = 1)")
+        if q <= sum(sequence):
+            raise ValueError("q має бути більшим суми послідовності!")
+        if gcd(q, r) != 1:
+            raise ValueError("r має бути взаємно простим до q! GCD(q, r) = 1")
         return q, r
 
     @staticmethod
