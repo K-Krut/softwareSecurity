@@ -3,11 +3,11 @@ import os
 
 
 class RSACipher:
-    def __init__(self, file="saved_key_info\\lab6_saved_key_info.txt"):
+    def __init__(self, keys=(None, None), file="keys\\keys_data.txt"):
+    # def __init__(self, keys=(None, None), file="saved_key_info\\lab6_saved_key_info.txt"):
     # def __init__(self, file="keys_data.txt"):
         self.file = file
-        self.public_key, self.private_key = None, None
-        # self.public_key, self.private_key = self.get_public_private_keys(keys)
+        self.public_key, self.private_key = keys  # self.get_public_private_keys(keys)
 
     def check_file_exist(self):
         return not os.path.isfile(self.file) or os.path.getsize(self.file) == 0
@@ -15,25 +15,26 @@ class RSACipher:
     @staticmethod
     def validate_keys(keys):
         if not (len(keys) == 2 and all(map(str.isdigit, keys))):
-            raise ValueError("Input must be two prime integers!")
+            raise ValueError("числа мають бути простими і цілими")
         p, q = int(keys[0]), int(keys[1])
 
         for num in range(2, max(p, q)):
             if p > num and p % num == 0:
-                raise ValueError("The 'p' number must be prime!")
+                raise ValueError("p має бути простим")
             if q > num and q % num == 0:
-                raise ValueError("The 'q' number must be prime!")
+                raise ValueError("q має бути простим")
         return p, q
 
     @staticmethod
     def get_e(lcm_value):
-        e = input(f"Type e. 1 < e < {lcm_value} & e co-prime to {lcm_value}").strip()
+        e = input(f"1 < e < {lcm_value} & e взаємно просте до {lcm_value}: ").strip()
         if not e.isdigit():
-            raise ValueError(f"e must be integer")
+            raise ValueError(f"e має бути цілим")
         e = int(e)
         if not lcm_value > e > 1 == gcd(e, lcm_value):
-            raise ValueError(f"e must be 1 < e < {lcm_value} & e co-prime to {lcm_value}")
+            raise ValueError(f"1 < e < {lcm_value} & e взаємно просте до {lcm_value}")
         return e
+
     @staticmethod
     def get_d(e, lcm_value):
         d = 1
@@ -72,5 +73,20 @@ class RSACipher:
         return " ".join([str(pow(ord(char), self.public_key[1]) % self.public_key[0]) for char in text])
 
     def decrypt(self, text):
-        print([chr(pow(int(num), self.private_key[1]) % self.private_key[0]) for num in text.split(" ")])
         return "".join([chr(pow(int(num), self.private_key[1]) % self.private_key[0]) for num in text.split(" ")])
+
+
+# rsa = RSACipher()
+# rsa.read_public_private_keys()
+# print(rsa.encrypt('test'))
+# print(rsa.decrypt('51 82 19 51'))
+
+
+# rsa = RSACipher()
+# rsa.get_public_private_keys('61 53'.strip().split(" "))
+# print(rsa.decrypt(rsa.encrypt('test')))
+
+
+# rsa = RSACipher()
+# rsa.read_public_private_keys()
+# print(rsa.decrypt(rsa.encrypt('test')))

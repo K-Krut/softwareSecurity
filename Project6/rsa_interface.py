@@ -32,13 +32,13 @@ class RSACipherCLI:
     
     def encrypt(self):
         if self.check_file():
-            self.cipher.get_public_private_keys(input(f"type public and private keys: ").strip().split(" "))
+            self.cipher.get_public_private_keys(input(f"Введіть public & private ключі: ").strip().split(" "))
         self.cipher.read_public_private_keys()
         print(f'Зашифрований текст: {self.cipher.encrypt(input("Введіть текст для шифрування: "))}\n')
 
     def decrypt(self):
         if self.check_file():
-            self.cipher.get_public_private_keys(input(f"type public and private keys: ").strip().split(" "))
+            self.cipher.get_public_private_keys(input(f"Введіть public & private ключі: ").strip().split(" "))
         self.cipher.read_public_private_keys()
         print(f'Розшифрований текст: {self.cipher.decrypt(input("Введіть текст: "))}\n')
 
