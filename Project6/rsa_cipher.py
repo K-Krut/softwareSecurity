@@ -2,23 +2,15 @@ from math import gcd, lcm
 import os
 
 
-class MerkleHellmanCipher:
-    def __init__(self):
-       pass
-    # def encrypt(self, text):
-    #     return " ".join([str(pow(ord(char), public_encryption_key[1]) % public_encryption_key[0]) for char in text])
-    #
-    # def decrypt(self, text):
-    #     return "".join([chr(pow(int(one_number), private_encryption_key[1]) % private_encryption_key[0])
-    #                     for one_number in text.split(" ")])
+class RSACipher:
+    def __init__(self, file="saved_key_info\\lab6_saved_key_info.txt"):
+    # def __init__(self, file="keys_data.txt"):
+        self.file = file
+        self.public_key, self.private_key = None, None
+        # self.public_key, self.private_key = self.get_public_private_keys(keys)
 
-    @staticmethod
-    def check_file(file):
-        file_exist = not os.path.isfile(file) or os.path.getsize(file) == 0
-        if not file_exist:
-            user_answer = input("чи хочете ви змінити ключі? (yes or no)\n").strip().lower()
-            return not file_exist and user_answer == "yes"
-        return file_exist
+    def check_file_exist(self):
+        return not os.path.isfile(self.file) or os.path.getsize(self.file) == 0
 
     @staticmethod
     def validate_keys(keys):
@@ -42,7 +34,6 @@ class MerkleHellmanCipher:
         if not lcm_value > e > 1 == gcd(e, lcm_value):
             raise ValueError(f"e must be 1 < e < {lcm_value} & e co-prime to {lcm_value}")
         return e
-
     @staticmethod
     def get_d(e, lcm_value):
         d = 1
@@ -50,36 +41,36 @@ class MerkleHellmanCipher:
             d += 1
         return d
 
-    def rsa_encryption(self, arg_encrypt_or_decrypt, arg_chose_process):
-        result_data = []
-        file = "keys_data.txt"
+    def get_public_private_keys(self, keys=None):
+        p, q = self.validate_keys(keys)
+        n = p * q
+        lcm_value = lcm(p - 1, q - 1)
 
-        if self.check_file(file):
-            p, q = self.validate_keys(input(f"type public and private keys").strip().split(" "))
-            n = p * q
-            lcm_value = lcm(p - 1, q - 1)
+        e = self.get_e(lcm_value)
+        d = self.get_d(e, lcm_value)
 
-            e = self.get_e(lcm_value)
-            d = self.get_d(e, lcm_value)
+        public_key = [n, e]
+        private_key = [n, d]
 
-            public_key = [n, e]
-            private_key = [n, d]
+        with open(self.file, "wt") as file:
+            file.write("\n".join(map(str, public_key + private_key)))
 
-            with open(file, "wt") as file_for_save:
-                file_for_save.write("\n".join(map(str, public_key + private_key)))
-        else:
-            with open(file, "rt") as file_for_save:
-                key_info = file_for_save.read().split("\n")
-            public_key = [int(key_info[0]), int(key_info[1])]
-            private_key = [int(key_info[2]), int(key_info[3])]
+        self.public_key, self.private_key = public_key, private_key
+        return public_key, private_key
 
-        # encryption or decryption
-        if arg_chose_process == "1":
-            encrypted_data = [str(pow(ord(one_char), public_key[1]) % public_key[0])
-                              for one_char in self.the_string_value]
-            result_data.append(" ".join(encrypted_data))
-        else:
-            decrypted_data = [chr(pow(int(one_number), private_key[1]) % private_key[0])
-                              for one_number in self.the_string_value.split(" ")]
-            result_data.append("".join(decrypted_data))
-        return result_data
+    def read_public_private_keys(self):
+        with open(self.file, "rt") as file:
+            data = file.read().split("\n")
+        public_key = [int(data[0]), int(data[1])]
+        private_key = [int(data[2]), int(data[3])]
+
+        self.public_key, self.private_key = public_key, private_key
+        return public_key, private_key
+
+
+    def encrypt(self, text):
+        return " ".join([str(pow(ord(char), self.public_key[1]) % self.public_key[0]) for char in text])
+
+    def decrypt(self, text):
+        print([chr(pow(int(num), self.private_key[1]) % self.private_key[0]) for num in text.split(" ")])
+        return "".join([chr(pow(int(num), self.private_key[1]) % self.private_key[0]) for num in text.split(" ")])
